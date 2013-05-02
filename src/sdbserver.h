@@ -1,5 +1,4 @@
 
-
 extern "C" {
 
 #include <string.h>
@@ -32,6 +31,8 @@ using Poco::Util::Option;
 using Poco::Util::OptionSet;
 using Poco::Util::HelpFormatter;
 
+namespace sdb {
+
 class SdbServer : public Runnable {
 public:
 	SdbServer(int port)
@@ -46,6 +47,10 @@ public:
 	~SdbServer() {
 		evconnlistener_free(listener_);
 		event_base_free(eventbase_);
+	}
+
+	void start() {
+		thread_.start(*this);
 	}
 
 	void run() {
@@ -63,6 +68,7 @@ public:
 
 		event_base_dispatch(eventbase_);
 		std::cout << "run exit" << std::endl;
+		thread_.join();
 	}
 
 	void stop() {
@@ -122,76 +128,10 @@ private:
 	struct evconnlistener *listener_;
 	struct event_base *eventbase_ ;
 	int port_;
+
+	Poco::Thread thread_;
 };
 
 
-
-class SdbApplication : public ServerApplication {
-public:
-	SdbApplication()
-	: helpRequested_(false) {}
-	
-	~SdbApplication() {}
-
-protected:
-	void initialize(Application& self) {
-		loadConfiguration(); 
-		ServerApplication::initialize(self);
-	}
-		
-	void uninitialize() {
-		ServerApplication::uninitialize();
-	}
-
-	void defineOptions(OptionSet& options) {
-		ServerApplication::defineOptions(options);
-		
-		options.addOption(
-			Option("help", "h", "display help information on command line arguments")
-				.required(false)
-				.repeatable(false));
-	}
-
-	void handleOption(const std::string& name, const std::string& value) {
-		ServerApplication::handleOption(name, value);
-
-		if (name == "help")
-			helpRequested_ = true;
-	}
-
-	void displayHelp() {
-		HelpFormatter helpFormatter(options());
-		helpFormatter.setCommand(commandName());
-		helpFormatter.setUsage("OPTIONS");
-		helpFormatter.setHeader("Sdb server.");
-		helpFormatter.format(std::cout);
-	}
-
-	int main(const std::vector<std::string>& args) {
-		if (helpRequested_) {
-			displayHelp();
-		} else {
-			int port = (int)config().getInt("sdbserver.port", 9980);
-
-			SdbServer srv(port);
-			Thread srvThread; 
-			srvThread.start(srv);
-			srvThread.join();
-			waitForTerminationRequest();
-			srv.stop();
-			srvThread.join();
-		}
-		return Application::EXIT_OK;
-	}
-	
-private:
-	bool helpRequested_;
-};
-
-
-int main(int argc, char** argv) {
-	SdbApplication app;
-	return app.run(argc, argv);
 }
-
 

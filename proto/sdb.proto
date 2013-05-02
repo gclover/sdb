@@ -1,0 +1,22 @@
+package sdb;
+
+message GetReq {
+	required string key = 1;		
+}
+
+message GetRep {
+	required boolean result = 1;
+	required string value = 2;
+	optional string message = 3;
+}
+
+message PutReq {
+	required string key = 1;
+	required string value = 2;
+}
+
+message PutRep {
+	required boolean result = 1;
+	optional string message = 3;
+}
+
