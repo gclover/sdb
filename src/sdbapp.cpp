@@ -6,11 +6,18 @@
 #include <Poco/Util/Option.h>
 #include <Poco/Util/OptionSet.h>
 #include <Poco/Util/HelpFormatter.h>
+#include <Poco/Logger.h>
+#include <Poco/SimpleFileChannel.h>
+#include <Poco/AutoPtr.h>
+#include <sstream>
 #include <iostream>
 
 
 using Poco::Thread;
 using Poco::Runnable;
+using Poco::Logger;
+using Poco::SimpleFileChannel;
+using Poco::AutoPtr;
 using Poco::Util::ServerApplication;
 using Poco::Util::Application;
 using Poco::Util::Option;
@@ -67,6 +74,12 @@ protected:
 			displayHelp();
 		} else {
 			int port = (int)config().getInt("sdbserver.port", 9980);
+
+			AutoPtr<SimpleFileChannel> sChannel(new SimpleFileChannel());
+                        sChannel->setProperty("path", "loglog");
+
+                        logger().setChannel(sChannel);
+
 
 			SdbServer srv(port);
 			srv.start();

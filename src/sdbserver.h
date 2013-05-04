@@ -55,6 +55,13 @@ public:
 
 	void run() {
 
+		Application& app = Application::instance();
+
+                for (int i = 0; i < 10000; i++) {
+                        std::stringstream os;
+                        os << "sdb started " << i;
+                        app.logger().information(os.str());
+                }
 	
 		struct sockaddr_in sin = this->create_addr(port_);
 
