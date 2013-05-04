@@ -76,9 +76,8 @@ protected:
 			int port = (int)config().getInt("sdbserver.port", 9980);
 
 			AutoPtr<SimpleFileChannel> sChannel(new SimpleFileChannel());
-                        sChannel->setProperty("path", "loglog");
-
-                        logger().setChannel(sChannel);
+            sChannel->setProperty("path", "loglog");
+            logger().setChannel(sChannel);
 
 
 			SdbServer srv(port);
